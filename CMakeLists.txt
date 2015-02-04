@@ -34,8 +34,13 @@ find_package ( Protobuf REQUIRED )
 #
 # Sparse Hash
 #
-# This is needed to find sparse hash containers.
-#SPARSEHASH_INC = -I$(UNIX_SPARSEHASH_DIR)/include
+find_path ( SPARSEHASH_INCLUDE_DIR "google/dense_hash_map" )
+
+if(NOT SPARSEHASH_INCLUDE_DIR)
+    message(SEND_ERROR "Sparse Hash is required. Set SPARSEHASH_INCLUDE_DIR to the location of the headers")
+endif()
+
+message(STATUS "Sparse Hash headers : ${SPARSEHASH_INCLUDE_DIR}")
 
 
 #
@@ -104,7 +109,8 @@ PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CM
 # -------------------------------------------------------------------
 include_directories ( "${CMAKE_SOURCE_DIR}/src"
                       "${CMAKE_CURRENT_BINARY_DIR}"
-                      "${GFLAGS_INCLUDE_DIR}" )
+                      "${GFLAGS_INCLUDE_DIR}"
+                      "${SPARSEHASH_INCLUDE_DIR}" )
 
 set ( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++11" )
 
