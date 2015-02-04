@@ -27,21 +27,23 @@ set ( CPACK_PACKAGE_FILE_NAME
 # CMake scripts path
 set ( CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/ )
 
-find_package ( GFlags   REQUIRED )
+# ...................................................................
+  find_package ( GFlags   REQUIRED )
+# ...................................................................
+  find_package ( Protobuf REQUIRED )
+# ...................................................................
+  find_path ( SPARSEHASH_INCLUDE_DIR "google/dense_hash_map" )
 
-find_package ( Protobuf REQUIRED )
+  if(NOT SPARSEHASH_INCLUDE_DIR)
+      message(SEND_ERROR "Sparse Hash is required. Set SPARSEHASH_INCLUDE_DIR to the location of the headers")
+  endif()
 
-#
-# Sparse Hash
-#
-find_path ( SPARSEHASH_INCLUDE_DIR "google/dense_hash_map" )
-
-if(NOT SPARSEHASH_INCLUDE_DIR)
-    message(SEND_ERROR "Sparse Hash is required. Set SPARSEHASH_INCLUDE_DIR to the location of the headers")
-endif()
-
-message(STATUS "Sparse Hash headers : ${SPARSEHASH_INCLUDE_DIR}")
-
+  message(STATUS "Sparse Hash headers : ${SPARSEHASH_INCLUDE_DIR}")
+# ...................................................................
+  find_package ( FLEX REQUIRED )
+# ...................................................................
+  find_package ( BISON REQUIRED )
+# ...................................................................
 
 #
 # COIN-OR CLP / CBC
@@ -89,7 +91,26 @@ message(STATUS "Sparse Hash headers : ${SPARSEHASH_INCLUDE_DIR}")
 # Mono
 #
 
-# Generated code
+# -------------------------------------------------------------------
+# GENERATED CODE
+# -------------------------------------------------------------------
+
+#
+# Flex & Bison
+#
+make_directory(${CMAKE_BINARY_DIR}/old_flatzinc)
+FLEX_TARGET(OLD_FLATZINC_SCANNER "src/old_flatzinc/flatzinc.lex" "${CMAKE_BINARY_DIR}/old_flatzinc/flatzinc.yy.cc" )
+BISON_TARGET(OLD_FLATZINC_PARSER "src/old_flatzinc/flatzinc.yy" "${CMAKE_BINARY_DIR}/old_flatzinc/flatzinc.tab.cc" )
+ADD_FLEX_BISON_DEPENDENCY(OLD_FLATZINC_SCANNER OLD_FLATZINC_PARSER)
+
+make_directory(${CMAKE_BINARY_DIR}/flatzinc)
+FLEX_TARGET(FLATZINC_SCANNER "src/flatzinc/parser.lex" "${CMAKE_BINARY_DIR}/flatzinc/parser.yy.cc" )
+BISON_TARGET(FLATZINC_PARSER "src/flatzinc/parser.yy" "${CMAKE_BINARY_DIR}/flatzinc/parser.tab.cc" )
+ADD_FLEX_BISON_DEPENDENCY(FLATZINC_SCANNER FLATZINC_PARSER)
+
+#
+# Protobuf 
+#
 
 # This allows to find the other protos when compiling a proto
 set ( PROTOBUF_IMPORT_DIRS "${CMAKE_SOURCE_DIR}/src/" )
@@ -120,7 +141,12 @@ set ( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++11" )
 
 file ( GLOB_RECURSE OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/*.cc" )
 
-add_library(OR_TOOLS_LIBRARIES ${OR_TOOLS_SOURCES} ${OR_TOOLS_GENERATED_CODE})
+add_library(OR_TOOLS_LIBRARIES ${OR_TOOLS_SOURCES} 
+                               ${OR_TOOLS_GENERATED_CODE}
+                               ${FLEX_OLD_FLATZINC_SCANNER_OUTPUTS} 
+                               ${BISON_OLD_FLATZINC_PARSER_OUTPUTS}
+                               ${FLEX_FLATZINC_SCANNER_OUTPUTS} 
+                               ${BISON_FLATZINC_PARSER_OUTPUTS} )
 
 # algorithms  base  bop  com  constraint_solver  flatzinc  glop  graph  linear_solver  lp_data  old_flatzinc  ortools  sat  util
 #add_library ( OR_TOOLS_LIBRARIES
