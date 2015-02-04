@@ -34,3 +34,5 @@ dependencies/sources/swig-3.0.7/
 
 bin/
 src/gen/
+*.swp
+*~
