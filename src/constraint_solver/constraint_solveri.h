@@ -254,7 +254,7 @@ inline uint64 Hash1(void* const ptr) {
 #if defined(ARCH_K8) || defined(__powerpc64__) || defined(__aarch64__)
   return Hash1(reinterpret_cast<uint64>(ptr));
 #else
-  return Hash1(reinterpret_cast<uint32>(ptr));
+  return Hash1(ptr);
 #endif
 }
 
