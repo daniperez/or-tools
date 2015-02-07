@@ -98,29 +98,29 @@ set ( CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/ )
 #
 # Flex & Bison
 #
-make_directory(${CMAKE_BINARY_DIR}/old_flatzinc)
-FLEX_TARGET(OLD_FLATZINC_SCANNER "src/old_flatzinc/flatzinc.lex" "${CMAKE_BINARY_DIR}/old_flatzinc/flatzinc.yy.cc" )
-BISON_TARGET(OLD_FLATZINC_PARSER "src/old_flatzinc/flatzinc.yy" "${CMAKE_BINARY_DIR}/old_flatzinc/flatzinc.tab.cc" )
-ADD_FLEX_BISON_DEPENDENCY(OLD_FLATZINC_SCANNER OLD_FLATZINC_PARSER)
+#make_directory(${CMAKE_BINARY_DIR}/old_flatzinc)
+#BISON_TARGET(OLD_FLATZINC_PARSER "src/old_flatzinc/flatzinc.yy" "${CMAKE_BINARY_DIR}/old_flatzinc/flatzinc.tab.cc" )
+#FLEX_TARGET(OLD_FLATZINC_SCANNER "src/old_flatzinc/flatzinc.lex" "${CMAKE_BINARY_DIR}/old_flatzinc/flatzinc.yy.cc" )
+#ADD_FLEX_BISON_DEPENDENCY(OLD_FLATZINC_SCANNER OLD_FLATZINC_PARSER)
 
-make_directory(${CMAKE_BINARY_DIR}/flatzinc)
-FLEX_TARGET(FLATZINC_SCANNER "src/flatzinc/parser.lex" "${CMAKE_BINARY_DIR}/flatzinc/parser.yy.cc" )
-BISON_TARGET(FLATZINC_PARSER "src/flatzinc/parser.yy" "${CMAKE_BINARY_DIR}/flatzinc/parser.tab.cc" )
-ADD_FLEX_BISON_DEPENDENCY(FLATZINC_SCANNER FLATZINC_PARSER)
+#make_directory(${CMAKE_BINARY_DIR}/flatzinc)
+#BISON_TARGET(FLATZINC_PARSER "src/flatzinc/parser.yy" "${CMAKE_BINARY_DIR}/flatzinc/parser.tab.cc" )
+#FLEX_TARGET(FLATZINC_SCANNER "src/flatzinc/parser.lex" "${CMAKE_BINARY_DIR}/flatzinc/parser.yy.cc" )
+#ADD_FLEX_BISON_DEPENDENCY(FLATZINC_SCANNER FLATZINC_PARSER)
 
 #
 # Protobuf 
 #
 
 # This allows to find the other protos when compiling a proto
-set ( PROTOBUF_IMPORT_DIRS "${CMAKE_SOURCE_DIR}/src/" )
+set ( PROTOBUF_IMPORT_DIRS "${CMAKE_SOURCE_DIR}/src" )
 
 PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/sat/boolean_problem.proto" )
 PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/sat/sat_parameters.proto" )
 PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/linear_solver/linear_solver2.proto" )
+PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/constraint_solver/search_limit.proto" )
 PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/constraint_solver/model.proto" )
 PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/constraint_solver/assignment.proto" )
-PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/constraint_solver/search_limit.proto" )
 PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/constraint_solver/demon_profiler.proto" )
 PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/glop/parameters.proto" )
 PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/bop/bop_parameters.proto" )
@@ -139,42 +139,44 @@ set ( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++11" )
 # TARGETS 
 # -------------------------------------------------------------------
 
-file ( GLOB_RECURSE OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/*.cc" )
+file(GLOB_RECURSE OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/*.cc")
+
+# The following files weren't compiled in the original Makefile:
+list(REMOVE_ITEM OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/glop/matrix_utils.cc")
+list(REMOVE_ITEM OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/glop/proto_driver.cc")
+list(REMOVE_ITEM OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/lp_data/png_dump.cc")
+# I don't get to compile the flex/bison code:
+list(REMOVE_ITEM OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/old_flatzinc/booleans.cc")
+list(REMOVE_ITEM OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/old_flatzinc/flatzinc_constraints.cc")
+list(REMOVE_ITEM OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/old_flatzinc/fz_search.cc")
+list(REMOVE_ITEM OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/old_flatzinc/registry.cc")
+list(REMOVE_ITEM OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/old_flatzinc/flatzinc.cc")
+list(REMOVE_ITEM OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/old_flatzinc/fz.cc")
+list(REMOVE_ITEM OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/old_flatzinc/parser.cc")
+list(REMOVE_ITEM OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/flatzinc/constraints.cc")
+list(REMOVE_ITEM OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/flatzinc/flatzinc_constraints.cc")
+list(REMOVE_ITEM OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/flatzinc/fz.cc")
+list(REMOVE_ITEM OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/flatzinc/model.cc")
+list(REMOVE_ITEM OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/flatzinc/parallel_support.cc")
+list(REMOVE_ITEM OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/flatzinc/parser.cc")
+list(REMOVE_ITEM OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/flatzinc/parser_main.cc")
+list(REMOVE_ITEM OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/flatzinc/presolve.cc")
+list(REMOVE_ITEM OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/flatzinc/sat_constraint.cc")
+list(REMOVE_ITEM OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/flatzinc/search.cc")
+list(REMOVE_ITEM OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/flatzinc/sequential_support.cc")
+list(REMOVE_ITEM OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/flatzinc/solver.cc")
 
 add_library(OR_TOOLS_LIBRARIES ${OR_TOOLS_SOURCES} 
                                ${OR_TOOLS_GENERATED_CODE}
-                               ${FLEX_OLD_FLATZINC_SCANNER_OUTPUTS} 
                                ${BISON_OLD_FLATZINC_PARSER_OUTPUTS}
-                               ${FLEX_FLATZINC_SCANNER_OUTPUTS} 
-                               ${BISON_FLATZINC_PARSER_OUTPUTS} )
-
-# algorithms  base  bop  com  constraint_solver  flatzinc  glop  graph  linear_solver  lp_data  old_flatzinc  ortools  sat  util
-#add_library ( OR_TOOLS_LIBRARIES
-#    # Algorithms
-#    "src/algorithms/dynamic_partition.cc"
-#    "src/algorithms/find_graph_symmetries.cc"
-#    "src/algorithms/knapsack_solver.cc"
-#    "src/algorithms/dynamic_permutation.cc"
-#    "src/algorithms/hungarian.cc"
-#    "src/algorithms/sparse_permutation.cc"
-#    # Base
-#    "src/base/bitmap.cc"
-#    "src/base/join.cc"
-#    "src/base/random.cc"
-#    "src/base/stringprintf.cc"
-#    "src/base/time_support.cc
-#    "src/base/callback.cc"
-#    "src/base/logging.cc"
-#    "src/base/recordio.cc"
-#    "src/base/sysinfo.cc"
-#    "src/base/file.cc"
-#    "src/base/mutex.cc"
-#    "src/base/split.cc        src/base/threadpool.cc
-#src/base/filelinereader.cc  src/base/numbers.cc  src/base/stringpiece.cc  src/base/timer.cc
-
+                               ${FLEX_OLD_FLATZINC_SCANNER_OUTPUTS} 
+                               ${BISON_FLATZINC_PARSER_OUTPUTS} 
+                               ${FLEX_FLATZINC_SCANNER_OUTPUTS} ) 
 
 target_link_libraries ( OR_TOOLS_LIBRARIES "${GFLAGS_LIBRARY}"
-                                           "${PROTOBUF_LIBRARIES}" )
+                                           "${PROTOBUF_LIBRARIES}" 
+                                           "${FLEX_LIBRARIES}" )
+
 # add_custom_target (
 #              check
 #              COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure 
