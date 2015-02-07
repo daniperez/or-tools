@@ -13,7 +13,7 @@
 
 
 syntax = "proto3";
-import "constraint_solver/search_limit.proto";
+import "search_limit.proto";
 
 package operations_research;
 
