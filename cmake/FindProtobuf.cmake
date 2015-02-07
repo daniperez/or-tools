@@ -121,7 +121,7 @@ function(PROTOBUF_GENERATE_CPP SRCS HDRS PROTO)
       COMMAND  ${PROTOBUF_PROTOC_EXECUTABLE}
       ARGS --cpp_out  ${CMAKE_CURRENT_BINARY_DIR}/${DESTINATION_DIR} ${_protobuf_include_path} ${ABS_FIL}
       DEPENDS ${ABS_FIL}
-      COMMENT "Running C++ protocol buffer compiler on ${FIL}"
+      COMMENT "Running C++ protocol buffer compiler on ${PROTO}"
       VERBATIM )
 
   set_source_files_properties(${${SRCS}} ${${HDRS}} PROPERTIES GENERATED TRUE)
