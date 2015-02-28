@@ -78,6 +78,8 @@ set ( CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/ )
 #
 # Swig (GLPK, CLP, CBC, SCIP, SLM, CPLEX, GUROBI, CPLEX) 
 #
+find_package(SWIG)
+INCLUDE(${SWIG_USE_FILE})
 
 #
 # Python.h
@@ -86,6 +88,7 @@ set ( CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/ )
 #
 # Java
 #
+find_package(JNI)
 
 #
 # Mono
@@ -109,6 +112,74 @@ set ( CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/ )
 #ADD_FLEX_BISON_DEPENDENCY(FLATZINC_SCANNER FLATZINC_PARSER)
 
 #
+# SWIG 
+#
+if (SWIG_FOUND)
+
+    function(generate_swig SWIG_FILE _SWIG_FILE 
+                           OUTPUT_FILE _OUTPUT_FILE
+                           OUTPUT_DIR _OUTPUT_DIR
+                           PACKAGE _PACKAGE
+                           MODULE _MODULE)
+
+        set ( OUTPUT_FILE_FULL_PATH "${_OUTPUT_DIR}/${_OUTPUT_FILE}" )
+
+        add_custom_command(
+                           OUTPUT ${OUTPUT_FILE_FULL_PATH}
+                           DEPENDS ${_SWIG_FILE}
+                           COMMAND ${CMAKE_COMMAND} -E make_directory ${_OUTPUT_DIR}
+                           COMMAND ${SWIG_EXECUTABLE}
+                           ARGS    -c++ -java
+                                   -o ${OUTPUT_FILE_FULL_PATH}
+                                   -package ${_PACKAGE} 
+                                   -module ${_MODULE}
+                                   -outdir "${_OUTPUT_DIR}"
+                                   -I${CMAKE_SOURCE_DIR}/src
+                                   ${_SWIG_FILE}
+                           COMMENT "Generating Java interface ${_SWIG_FILE} ...")
+
+    endfunction()
+
+    generate_swig(
+        SWIG_FILE "${CMAKE_SOURCE_DIR}/src/constraint_solver/java/constraint_solver.swig"
+        OUTPUT_FILE "constraint_solver_java_wrap.cc"
+        OUTPUT_DIR "${CMAKE_BINARY_DIR}/constraint_solver"
+        PACKAGE "com.google.ortools.constraintsolver"
+        MODULE "operations_research_constraint_solver")
+
+    generate_swig(
+        SWIG_FILE "${CMAKE_SOURCE_DIR}/src/algorithms/java/knapsack_solver.swig"
+        OUTPUT_FILE "knapsack_solver_java_wrap.cc"
+        OUTPUT_DIR "${CMAKE_BINARY_DIR}/algorithms"
+        PACKAGE "com.google.ortools.algorithms"
+        MODULE "operations_research_algorithms")
+
+    generate_swig(
+        SWIG_FILE "${CMAKE_SOURCE_DIR}/src/graph/java/graph.swig"
+        OUTPUT_FILE "graph_java_wrap.cc"
+        OUTPUT_DIR "${CMAKE_BINARY_DIR}/graph"
+        PACKAGE "com.google.ortools.graph"
+        MODULE "operations_research_graph")
+
+    generate_swig(
+        SWIG_FILE "${CMAKE_SOURCE_DIR}/src/linear_solver/java/linear_solver.swig"
+        OUTPUT_FILE "linear_solver_java_wrap.cc"
+        OUTPUT_DIR "${CMAKE_BINARY_DIR}/linear_solver"
+        PACKAGE "com.google.ortools.linearsolver"
+        MODULE "operations_research_linear_solver")
+
+    include_directories(${JNI_INCLUDE_DIRS})
+
+    ADD_LIBRARY( ortools_java SHARED  
+        "${CMAKE_BINARY_DIR}/constraint_solver/constraint_solver_java_wrap.cc"
+        "${CMAKE_BINARY_DIR}/algorithms/knapsack_solver_java_wrap.cc"
+        "${CMAKE_BINARY_DIR}/graph/graph_java_wrap.cc"
+        "${CMAKE_BINARY_DIR}/linear_solver/linear_solver_java_wrap.cc"
+    )
+
+endif()
+
+#
 # Protobuf 
 #
 
@@ -130,7 +201,7 @@ PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CM
 # -------------------------------------------------------------------
 include_directories ( "${CMAKE_SOURCE_DIR}/src"
                       "${CMAKE_CURRENT_BINARY_DIR}"
-                      "${GFLAGS_INCLUDE_DIR}"
+                      "${GFLAGS_INCLUDE_DIRS}"
                       "${SPARSEHASH_INCLUDE_DIR}" )
 
 set ( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++11" )
@@ -166,16 +237,27 @@ list(REMOVE_ITEM OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/flatzinc/search.cc")
 list(REMOVE_ITEM OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/flatzinc/sequential_support.cc")
 list(REMOVE_ITEM OR_TOOLS_SOURCES "${CMAKE_SOURCE_DIR}/src/flatzinc/solver.cc")
 
-add_library(OR_TOOLS_LIBRARIES ${OR_TOOLS_SOURCES} 
-                               ${OR_TOOLS_GENERATED_CODE}
-                               ${BISON_OLD_FLATZINC_PARSER_OUTPUTS}
-                               ${FLEX_OLD_FLATZINC_SCANNER_OUTPUTS} 
-                               ${BISON_FLATZINC_PARSER_OUTPUTS} 
-                               ${FLEX_FLATZINC_SCANNER_OUTPUTS} ) 
+add_library(OR_TOOLS_LIBRARIES SHARED ${OR_TOOLS_SOURCES} 
+                                      ${OR_TOOLS_GENERATED_CODE}
+                                      ${BISON_OLD_FLATZINC_PARSER_OUTPUTS}
+                                      ${FLEX_OLD_FLATZINC_SCANNER_OUTPUTS} 
+                                      ${BISON_FLATZINC_PARSER_OUTPUTS} 
+                                      ${FLEX_FLATZINC_SCANNER_OUTPUTS} ) 
 
-target_link_libraries ( OR_TOOLS_LIBRARIES "${GFLAGS_LIBRARY}"
-                                           "${PROTOBUF_LIBRARIES}" 
-                                           "${FLEX_LIBRARIES}" )
+target_link_libraries (OR_TOOLS_LIBRARIES ${GFLAGS_LIBRARIES}
+                                          ${PROTOBUF_LIBRARIES} 
+                                          ${FLEX_LIBRARIES} )
+
+set_target_properties(OR_TOOLS_LIBRARIES PROPERTIES OUTPUT_NAME "ortools")
+
+
+#
+# Java libraries 
+#
+if (SWIG_FOUND AND JNI_FOUND)
+    TARGET_LINK_LIBRARIES( ortools_java ${OR_TOOLS_LIBRARIES} ${JNI_LIBRARIES})
+endif()
+
 
 # add_custom_target (
 #              check
