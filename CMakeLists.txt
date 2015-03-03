@@ -89,6 +89,7 @@ INCLUDE(${SWIG_USE_FILE})
 # Java
 #
 find_package(JNI)
+find_package(Java COMPONENTS Development)
 
 #
 # Mono
@@ -184,9 +185,10 @@ set_target_properties(OR_TOOLS_LIBRARIES PROPERTIES OUTPUT_NAME "ortools")
 
 
 #
-# Java
+# Java libraries
 #
-if (SWIG_FOUND AND JNI_FOUND)
+message("[TODO] WRITE THE VALUE OF THE JAVA VARIABLES TO STDOUT TO SHOW THE USER WHAT'S MISSING")
+if (DEFINED Java_JAVAC_EXECUTABLE AND DEFINED Java_JAR_EXECUTABLE AND JAVA_FOUND AND SWIG_FOUND AND JNI_FOUND)
     include("CmakeLists.java")
 endif()
 
