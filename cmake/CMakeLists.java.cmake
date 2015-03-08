@@ -11,7 +11,7 @@ function(generate_swig SWIG_FILE _SWIG_FILE
 
     add_custom_command(
                        OUTPUT ${OUTPUT_FILE_FULL_PATH}
-                       DEPENDS ${_SWIG_FILE}
+                       DEPENDS ${_SWIG_FILE} OR_TOOLS_LIBRARIES
                        COMMAND ${CMAKE_COMMAND} -E make_directory ${_OUTPUT_DIR}
                        COMMAND ${SWIG_EXECUTABLE}
                        ARGS    -c++ -java
@@ -55,41 +55,49 @@ generate_swig(
     PACKAGE "com.google.ortools.linearsolver"
     MODULE "operations_research_linear_solver")
 
+generate_swig(
+    SWIG_FILE "${CMAKE_SOURCE_DIR}/src/linear_solver/java/linear_solver.swig"
+    OUTPUT_FILE "linear_solver_java_wrap.cc"
+    OUTPUT_DIR "${SWIG_OUTPUT_DIR}/linear_solver"
+    PACKAGE "com.google.ortools.linearsolver"
+    MODULE "operations_research_linear_solver")
+
+
 # ====================================
 # Generate JNI library with SWIG stubs
 # ====================================
 include_directories(${JNI_INCLUDE_DIRS})
 
-add_library( ortools_java SHARED  
+add_library( OR_TOOLS_JAVA_LIBRARIES SHARED  
     "${SWIG_OUTPUT_DIR}/constraint_solver/constraint_solver_java_wrap.cc"
     "${SWIG_OUTPUT_DIR}/algorithms/knapsack_solver_java_wrap.cc"
     "${SWIG_OUTPUT_DIR}/graph/graph_java_wrap.cc"
     "${SWIG_OUTPUT_DIR}/linear_solver/linear_solver_java_wrap.cc"
 )
 
-target_link_libraries( ortools_java ${OR_TOOLS_LIBRARIES} ${JNI_LIBRARIES})
+target_link_libraries( OR_TOOLS_JAVA_LIBRARIES ${OR_TOOLS_LIBRARIES} ${JNI_LIBRARIES})
 
-# ==========
-# Compile 
-# ==========
-add_custom_command(
-   OUTPUT ${CMAKE_BINARY_DIR}/
-   DEPENDS ortools_java 
-   COMMAND ${Java_JAVAC_EXECUTABLE} -d ${CMAKE_BINARY_DIR} -C ${CMAKE_BINARY_DIR} 
-           ${CMAKE_SOURCE_DIR}/com/google/ortools/*.java
-           COMMENT "Compiling java samples ...")
-
-#$(JAVAC_BIN) -d $(OBJ_DIR) $(SRC_DIR)$Scom$Sgoogle$Sortools$Sconstraintsolver$S*.java $(GEN_DIR)$Scom$Sgoogle$Sortools$Sconstraintsolver$S*.java $(GEN_DIR)$Scom$Sgoogle$Sortools$Salgorithms$S*.java $(GEN_DIR)$Scom$Sgoogle$Sortools$Sgraph$S*.java $(GEN_DIR)$Scom$Sgoogle$Sortools$Slinearsolver$S*.java
-
+set_target_properties( OR_TOOLS_JAVA_LIBRARIES PROPERTIES OUTPUT_NAME "ortools_java")
 
 # ==========
 # Create jar
 # ==========
-set(OR_TOOLS_JAR com.google.ortools.jar)
 
-add_custom_command(
-   OUTPUT ${CMAKE_BINARY_DIR}/${OR_TOOLS_JAR}
-   DEPENDS ortools_java 
-   COMMAND ${Java_JAR_EXECUTABLE} cf ${OR_TOOLS_JAR} -C ${CMAKE_BINARY_DIR} com/google/ortools/
-   COMMENT "Generating ${OR_TOOLS_JAR} ...")
+set ( OR_TOOLS_JAVA_FILES
+    ${CMAKE_BINARY_DIR}/com/google/ortools/algorithms/*.java
+    ${CMAKE_BINARY_DIR}/com/google/ortools/graph/*.java
+    ${CMAKE_BINARY_DIR}/com/google/ortools/constraint_solver/*.java
+    ${CMAKE_BINARY_DIR}/com/google/ortools/linear_solver/*.java
+    ##
+    ${CMAKE_SOURCE_DIR}/src/com/google/ortools/constraintsolver/JavaDecisionBuilder.java
+)
 
+set (OR_TOOLS_JAR ${CMAKE_BINARY_DIR}/ortools-${CPACK_RPM_PACKAGE_VERSION}.jar)
+
+add_custom_command(TARGET OR_TOOLS_JAVA_LIBRARIES POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E make_directory classes
+                   COMMAND ${Java_JAVAC_EXECUTABLE} -d classes ${OR_TOOLS_JAVA_FILES}
+                   COMMAND ${Java_JAR_EXECUTABLE} cf ${OR_TOOLS_JAR} -C classes .
+                   COMMAND ${Java_JAR_EXECUTABLE} uf ${OR_TOOLS_JAR} $<TARGET_FILE_NAME:OR_TOOLS_JAVA_LIBRARIES>
+                   COMMAND ${Java_JAR_EXECUTABLE} uf ${OR_TOOLS_JAR} $<TARGET_FILE_NAME:OR_TOOLS_LIBRARIES>
+                   COMMENT "Generating ${OR_TOOLS_JAR}...")

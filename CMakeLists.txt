@@ -32,9 +32,6 @@ set ( CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/ )
   # distributed by https://github.com/schuhschuh/gflags
   set ( GFLAGS_NAMESPACE "gflags" )
   find_package ( gflags 2.1.1 REQUIRED )
-  if ( DEFINED gflags_INCLUDE_DIR AND gflags_LIBRARIES )
-      message(STATUS "Found Gflags: ${gflags_INCLUDE_DIR}, ${gflags_LIBRARIES}")
-  endif()
 # ...................................................................
   find_package ( Protobuf REQUIRED )
 # ...................................................................
@@ -85,7 +82,8 @@ set ( CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/ )
 # Swig (GLPK, CLP, CBC, SCIP, SLM, CPLEX, GUROBI, CPLEX) 
 #
 find_package(SWIG)
-INCLUDE(${SWIG_USE_FILE})
+# include(${SWIG_USE_FILE})
+
 
 #
 # Python.h
@@ -96,6 +94,7 @@ INCLUDE(${SWIG_USE_FILE})
 #
 find_package(JNI)
 find_package(Java COMPONENTS Development)
+include(UseJava)
 
 #
 # Mono
