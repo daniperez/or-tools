@@ -72,11 +72,12 @@ target_link_libraries( ortools_java ${OR_TOOLS_LIBRARIES} ${JNI_LIBRARIES})
 # ==========
 # Compile 
 # ==========
-#add_custom_command(
-#   OUTPUT ${CMAKE_BINARY_DIR}/
-#   DEPENDS ortools_java 
-#   COMMAND ${Java_JAR_EXECUTABLE} cf ${OR_TOOLS_JAR} -C ${CMAKE_BINARY_DIR} com/google/ortools/
-#   COMMENT "Generating ${OR_TOOLS_JAR} ...")
+add_custom_command(
+   OUTPUT ${CMAKE_BINARY_DIR}/
+   DEPENDS ortools_java 
+   COMMAND ${Java_JAVAC_EXECUTABLE} -d ${CMAKE_BINARY_DIR} -C ${CMAKE_BINARY_DIR} 
+           ${CMAKE_SOURCE_DIR}/com/google/ortools/*.java
+           COMMENT "Compiling java samples ...")
 
 #$(JAVAC_BIN) -d $(OBJ_DIR) $(SRC_DIR)$Scom$Sgoogle$Sortools$Sconstraintsolver$S*.java $(GEN_DIR)$Scom$Sgoogle$Sortools$Sconstraintsolver$S*.java $(GEN_DIR)$Scom$Sgoogle$Sortools$Salgorithms$S*.java $(GEN_DIR)$Scom$Sgoogle$Sortools$Sgraph$S*.java $(GEN_DIR)$Scom$Sgoogle$Sortools$Slinearsolver$S*.java
 

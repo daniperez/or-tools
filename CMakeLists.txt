@@ -28,7 +28,13 @@ set ( CPACK_PACKAGE_FILE_NAME
 set ( CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/ )
 
 # ...................................................................
-  find_package ( GFlags   REQUIRED )
+  # Meant to find /usr/lib/cmake/gflags/gflags-config.cmake
+  # distributed by https://github.com/schuhschuh/gflags
+  set ( GFLAGS_NAMESPACE "gflags" )
+  find_package ( gflags 2.1.1 REQUIRED )
+  if ( DEFINED gflags_INCLUDE_DIR AND gflags_LIBRARIES )
+      message(STATUS "Found Gflags: ${gflags_INCLUDE_DIR}, ${gflags_LIBRARIES}")
+  endif()
 # ...................................................................
   find_package ( Protobuf REQUIRED )
 # ...................................................................
@@ -121,6 +127,7 @@ set ( PROTOBUF_IMPORT_DIRS "${CMAKE_SOURCE_DIR}/src" )
 
 PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/sat/boolean_problem.proto" )
 PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/sat/sat_parameters.proto" )
+PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/graph/flow_problem.proto" )
 PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/linear_solver/linear_solver2.proto" )
 PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/constraint_solver/search_limit.proto" )
 PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/constraint_solver/model.proto" )
@@ -132,9 +139,10 @@ PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CM
 # -------------------------------------------------------------------
 # HEADERS & COMPILE FLAGS 
 # -------------------------------------------------------------------
+message("[TODO] DON'T INCLUDE ALL!")
 include_directories ( "${CMAKE_SOURCE_DIR}/src"
                       "${CMAKE_CURRENT_BINARY_DIR}"
-                      "${GFLAGS_INCLUDE_DIRS}"
+                      "${gflags_INCLUDE_DIR}"
                       "${SPARSEHASH_INCLUDE_DIR}" )
 
 set ( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++11" )
@@ -177,7 +185,7 @@ add_library(OR_TOOLS_LIBRARIES SHARED ${OR_TOOLS_SOURCES}
                                       ${BISON_FLATZINC_PARSER_OUTPUTS} 
                                       ${FLEX_FLATZINC_SCANNER_OUTPUTS} ) 
 
-target_link_libraries (OR_TOOLS_LIBRARIES ${GFLAGS_LIBRARIES}
+target_link_libraries (OR_TOOLS_LIBRARIES ${gflags_LIBRARIES}
                                           ${PROTOBUF_LIBRARIES} 
                                           ${FLEX_LIBRARIES} )
 
@@ -188,8 +196,11 @@ set_target_properties(OR_TOOLS_LIBRARIES PROPERTIES OUTPUT_NAME "ortools")
 # Java libraries
 #
 message("[TODO] WRITE THE VALUE OF THE JAVA VARIABLES TO STDOUT TO SHOW THE USER WHAT'S MISSING")
-if (DEFINED Java_JAVAC_EXECUTABLE AND DEFINED Java_JAR_EXECUTABLE AND JAVA_FOUND AND SWIG_FOUND AND JNI_FOUND)
-    include("CmakeLists.java")
+if (DEFINED Java_JAVAC_EXECUTABLE AND
+    DEFINED Java_JAR_EXECUTABLE AND
+    DEFINED Java_JAVAC_EXECUTABLE AND 
+    JAVA_FOUND AND SWIG_FOUND AND JNI_FOUND)
+    include("CMakeLists.java")
 endif()
 
 
