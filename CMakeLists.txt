@@ -33,7 +33,7 @@ set ( CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/ )
   set ( GFLAGS_NAMESPACE "gflags" )
   find_package ( gflags 2.1.1 REQUIRED )
 # ...................................................................
-  find_package ( Protobuf REQUIRED )
+  find_package ( Protobuf 3 REQUIRED )
 # ...................................................................
   find_path ( SPARSEHASH_INCLUDE_DIR "google/dense_hash_map" )
 
@@ -127,11 +127,14 @@ set ( PROTOBUF_IMPORT_DIRS "${CMAKE_SOURCE_DIR}/src" )
 PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/sat/boolean_problem.proto" )
 PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/sat/sat_parameters.proto" )
 PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/graph/flow_problem.proto" )
-PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/linear_solver/linear_solver2.proto" )
+PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/linear_solver/linear_solver.proto" )
 PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/constraint_solver/search_limit.proto" )
 PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/constraint_solver/model.proto" )
 PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/constraint_solver/assignment.proto" )
 PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/constraint_solver/demon_profiler.proto" )
+PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/constraint_solver/solver_parameters.proto" )
+PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/constraint_solver/routing_parameters.proto" )
+PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/constraint_solver/routing_enums.proto" )
 PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/glop/parameters.proto" )
 PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CMAKE_SOURCE_DIR}/src/bop/bop_parameters.proto" )
 
@@ -141,6 +144,7 @@ PROTOBUF_GENERATE_CPP ( OR_TOOLS_GENERATED_CODE OR_TOOLS_GENERATED_HEADERS "${CM
 message("[TODO] DON'T INCLUDE ALL!")
 include_directories ( "${CMAKE_SOURCE_DIR}/src"
                       "${CMAKE_CURRENT_BINARY_DIR}"
+                      "${PROTOBUF_INCLUDE_DIRS}"
                       "${gflags_INCLUDE_DIR}"
                       "${SPARSEHASH_INCLUDE_DIR}" )
 

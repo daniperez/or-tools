@@ -1,0 +1,9 @@
+# Dani's TODOs
+
+Gflags: Fedora 20 uses 1.3, which has google as namespace, which 
+        is not valid anymore. Update to Gflags version distributed
+        in Gflags' Github (releases).
+
+To make it work: 
+ * Install protobuf 3 (all)
+ * cmake -DPROTOBUF_PROTOC_EXECUTABLE:STRING=/home/pitu/tmp/protoc/protobuf-cpp-bin/bin/protoc -DPROTOBUF_LIBRARY:STRING=/home/pitu/tmp/protoc/protobuf-cpp-bin/lib/libprotobuf.so -DPROTOBUF_PROTOC_LIBRARY:STRING=/home/pitu/tmp/protoc/protobuf-cpp-bin/lib/libprotoc.so -DPROTOBUF_INCLUDE_DIR:STRING=/home/pitu/tmp/protoc/protobuf-cpp-bin/include/ ../
